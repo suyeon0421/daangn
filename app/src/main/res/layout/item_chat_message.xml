@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="4dp">
+
+    <!-- 내가 보낸 메시지 (오른쪽 정렬) -->
+    <LinearLayout
+        android:id="@+id/layout_my_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_my_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="안녕하세요"
+            android:textColor="#000000"
+            android:maxWidth="250dp" />
+
+        <TextView
+            android:id="@+id/tv_my_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="오후 2:30"
+            android:textSize="10sp"
+            android:layout_gravity="end"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="4dp" />
+    </LinearLayout>
+
+    <!-- 상대방이 보낸 메시지 (왼쪽 정렬) -->
+    <LinearLayout
+        android:id="@+id/layout_other_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_other_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:padding="10dp"
+            android:text="네, 반갑습니다"
+            android:textColor="#000000"
+            android:maxWidth="250dp" />
+
+        <TextView
+            android:id="@+id/tv_other_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="오후 2:31"
+            android:textSize="10sp"
+            android:layout_marginTop="2dp"
+            android:layout_marginStart="4dp" />
+    </LinearLayout>
+
+    <!-- 위치 정보 메시지 -->
+    <LinearLayout
+        android:id="@+id/layout_location_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:background="#E3F2FD"
+        android:padding="8dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_mylocation" />
+
+        <TextView
+            android:id="@+id/tv_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="위치 정보"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_my_posts"
+        android:title="내 판매내역"
+        app:showAsAction="ifRoom" /> <!-- 공간이 되면 텍스트로, 아니면 더보기(...) 메뉴 안에 표시 -->
+
+
+</menu>
