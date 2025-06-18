@@ -25,7 +25,7 @@ import retrofit2.Response;
 
 public class PostDetailActivity extends AppCompatActivity {
     ImageView iv_product_image;
-    TextView tv_title, tv_price, tv_location, tv_content, tv_seller_name;
+    TextView tv_title, tv_price, tv_location, tv_content, tv_seller_name, tv_location_name;
     Button btn_chat, btn_mark_sold, btn_delete;
     String sellerName; // sellerName은 UI 업데이트 후 저장해도 됨
 
@@ -55,6 +55,7 @@ public class PostDetailActivity extends AppCompatActivity {
         tv_title = findViewById(R.id.tv_title);
         tv_price = findViewById(R.id.tv_price);
         tv_location = findViewById(R.id.tv_location);
+        tv_location_name = findViewById(R.id.tv_location_name);
         tv_content = findViewById(R.id.tv_content);
         tv_seller_name = findViewById(R.id.tv_seller_name);
         btn_chat = findViewById(R.id.btn_chat);
@@ -80,13 +81,6 @@ public class PostDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        btn_mark_sold.setOnClickListener(v -> {
-            Toast.makeText(this, "판매 완료 기능 구현 예정", Toast.LENGTH_SHORT).show();
-        });
-
-        btn_delete.setOnClickListener(v -> {
-            Toast.makeText(this, "게시물 삭제 기능 구현 예정", Toast.LENGTH_SHORT).show();
-        });
     }
 
     // 특정 게시물 상세 정보를 불러오는 메서드
@@ -98,7 +92,9 @@ public class PostDetailActivity extends AppCompatActivity {
                     post = response.body();
                     // UI에 데이터 바인딩
                     tv_title.setText(post.getTitle());
-                    tv_location.setText(post.getLocation_name());
+                    tv_location.setText("위도: " + String.format("%.4f", post.getLatitude()) + "\n" +
+                            "경도: " + String.format("%.4f", post.getLongitude()));
+                    tv_location_name.setText(post.getLocation_name());
                     tv_price.setText(String.format("%,d원", post.getPrice())); // 가격 포맷팅
                     tv_content.setText(post.getDescription());
                     tv_seller_name.setText(post.getSeller_name());
@@ -108,10 +104,12 @@ public class PostDetailActivity extends AppCompatActivity {
 
                     // Glide로 이미지 로드
                     String baseUrl = "https://swu-carrot.replit.app/";
+                    String imageUrl = post.getImage_url();
 
                     if (post.getImage_url() != null && !post.getImage_url().isEmpty()) {
+                        String fullUrl = baseUrl + imageUrl;
                         Glide.with(PostDetailActivity.this)
-                                .load(post.getImage_url())
+                                .load(fullUrl)
                                 .placeholder(R.drawable.default_image)
                                 .into(iv_product_image);
                     } else {

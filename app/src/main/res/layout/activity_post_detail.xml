@@ -16,7 +16,6 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
             <!-- Toolbar에 "내 판매내역" 이라고 코드에서 설정 -->
         </androidx.appcompat.widget.Toolbar>
-
         <ImageView
             android:id="@+id/iv_product_image"
             android:layout_width="match_parent"
@@ -60,6 +59,14 @@
 
             <TextView
                 android:id="@+id/tv_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="위치"
+                android:textSize="14sp"
+                android:layout_marginBottom="5dp"/>
+
+            <TextView
+                android:id="@+id/tv_location_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="위치"

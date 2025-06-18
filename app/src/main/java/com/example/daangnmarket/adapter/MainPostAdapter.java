@@ -21,6 +21,8 @@ import java.util.ArrayList;
 public class MainPostAdapter extends RecyclerView.Adapter<MainPostAdapter.ViewHolder> {
     private Context context;
     private ArrayList<PostResponse> mainPostList;
+    private double currentLat = 0.0;
+    private double currentLng = 0.0;
 
     public MainPostAdapter(Context context, ArrayList<PostResponse> mainPostList) {
         this.context = context;
@@ -30,7 +32,6 @@ public class MainPostAdapter extends RecyclerView.Adapter<MainPostAdapter.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imageProduct;
         TextView tv_title, tv_location, tv_price;
-        String sellerName;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -38,7 +39,6 @@ public class MainPostAdapter extends RecyclerView.Adapter<MainPostAdapter.ViewHo
             tv_title = itemView.findViewById(R.id.tv_title);
             tv_location = itemView.findViewById(R.id.tv_location);
             tv_price = itemView.findViewById(R.id.tv_price);
-
         }
     }
 
@@ -56,6 +56,7 @@ public class MainPostAdapter extends RecyclerView.Adapter<MainPostAdapter.ViewHo
         holder.tv_title.setText(post.getTitle());
         holder.tv_location.setText(post.getLocation_name());
         holder.tv_price.setText(post.getPrice() + "원"); // int를 문자열로 변환
+
 
         String baseUrl = "https://swu-carrot.replit.app/";
         String imageUrl = post.getImage_url();
@@ -79,6 +80,7 @@ public class MainPostAdapter extends RecyclerView.Adapter<MainPostAdapter.ViewHo
             context.startActivity(intent);
         });
     }
+
 
 
     @Override

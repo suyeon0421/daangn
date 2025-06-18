@@ -1,14 +1,23 @@
 package com.example.daangnmarket.activity;
 
+
+import static android.app.ProgressDialog.show;
+
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,6 +28,13 @@ import com.example.daangnmarket.adapter.MainPostAdapter;
 import com.example.daangnmarket.models.PostResponse;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import android.Manifest;
+import androidx.core.app.ActivityCompat;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,13 +43,20 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     private RecyclerView recyclerView;
     private MainPostAdapter postAdapter;
     private ApiService apiService;
     private FloatingActionButton fab_Add_Post;
     private ArrayList<PostResponse> mainPostList = new ArrayList<>();
+    private PostResponse post;
+    private FusedLocationProviderClient fusedLocationClient;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
+
+    double currentLat = 0.0;
+    double currentLng = 0.0;
+
 
 
     @Override
@@ -113,4 +136,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

@@ -1,29 +1,35 @@
 package com.example.daangnmarket.activity;
 
-import android.content.Context;
+import android.Manifest;
+import android.content.Context; // Context import 추가
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.SharedPreferences; // SharedPreferences import 추가
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.util.Log;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 
 import com.example.daangnmarket.ApiService;
 import com.example.daangnmarket.R;
 import com.example.daangnmarket.RetrofitClient;
 import com.example.daangnmarket.models.PostRequest;
 import com.example.daangnmarket.models.PostResponse;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
 
@@ -40,6 +46,12 @@ public class UploadActivity extends AppCompatActivity {
     private ApiService apiService;
 
     private ActivityResultLauncher<Intent> galleryLauncher;
+
+    private FusedLocationProviderClient fusedLocationClient;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
+
+    double currentLat = 0.0;
+    double currentLng = 0.0;
 
     // SharedPreferences에서 사용자 ID를 가져오기 위한 상수
     private static final String PREFS_NAME = "MyPrefsFile";
@@ -60,6 +72,11 @@ public class UploadActivity extends AppCompatActivity {
         if (toolbar != null) {
             toolbar.setNavigationOnClickListener(v -> onBackPressed());
         }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        //위치 권한 요청
+        checkLocationPermission();
 
         apiService = RetrofitClient.getInstance().getApiService();
 
@@ -89,9 +106,15 @@ public class UploadActivity extends AppCompatActivity {
         });
 
         btn_set_location.setOnClickListener(v -> {
-            Toast.makeText(UploadActivity.this, "위치 설정 기능은 현재 미구현입니다.", Toast.LENGTH_SHORT).show();
-            // 임시 위치 설정. 실제 앱에서는 지도 연동 등을 통해 사용자 위치를 받아와야 합니다.
-            tv_location.setText("대구광역시 중구");
+            fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+                if (location != null) {
+                    double latitude = location.getLatitude();
+                    double longtitude = location.getLongitude();
+                    String locationText = "위도: " + String.format("%.4f", latitude) + "\n" +
+                            "경도: " + String.format("%.4f", longtitude);
+                    tv_location.setText(locationText);
+                }
+            });
         });
 
         btn_upload.setOnClickListener(v -> {
@@ -138,17 +161,14 @@ public class UploadActivity extends AppCompatActivity {
             return;
         }
 
-        // TODO: 실제 위경도 데이터 가져오기 (현재는 임시값)
-        double currentLatitude = 35.8714;
-        double currentLongitude = 128.6014;
 
         PostRequest postRequest = new PostRequest(
                 title,
                 description,
                 price,
                 currentUserId,
-                currentLatitude,
-                currentLongitude,
+                currentLat,
+                currentLng,
                 location_name,
                 imageUrlString // 이미지 URI를 String으로 변환하여 전달
         );
@@ -183,5 +203,47 @@ public class UploadActivity extends AppCompatActivity {
                 Log.e("UploadActivity", "네트워크 오류: " + t.getMessage(), t);
             }
         });
+    }
+
+    private void checkLocationPermission() {
+        if(ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission
+                            .ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            getLastLocation();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grandResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grandResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grandResults.length > 0 && grandResults[0] ==
+                    PackageManager.PERMISSION_GRANTED) {
+                getLastLocation();
+            } else {
+                Toast.makeText(this, "위치 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void getLastLocation() {
+
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                        PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        };
+
     }
 }

@@ -3,11 +3,6 @@ package com.example.daangnmarket.models;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
-// import java.text.ParseException; // 불필요하므로 삭제
-// import java.text.SimpleDateFormat; // 불필요하므로 삭제
-// import java.util.Date; // 불필요하므로 삭제
-// import java.util.Locale; // 불필요하므로 삭제
-// import java.util.TimeZone; // 불필요하므로 삭제
 
 public class Message implements Serializable {
     public static final int TYPE_ME = 0;

@@ -27,7 +27,7 @@ import retrofit2.Response;
 
 public class MyPostDetailActivity extends AppCompatActivity {
     ImageView iv_detail_image;
-    TextView tv_detail_title, tv_detail_status, tv_detail_description, tv_detail_price, tv_detail_location; // 가격, 위치 TextView 추가
+    TextView tv_detail_title, tv_detail_status, tv_detail_description, tv_detail_price, tv_detail_location, tv_detail_location_name; // 가격, 위치 TextView 추가
     Button btn_delete, btn_mark_as_sold;
     // sellerName은 이 액티비티에서 직접적으로 사용되지 않아 제거하거나 필요한 경우에만 추가.
 
@@ -62,6 +62,7 @@ public class MyPostDetailActivity extends AppCompatActivity {
         tv_detail_description = findViewById(R.id.tv_detail_description);
         tv_detail_price = findViewById(R.id.tv_detail_price); // 가격 TextView 바인딩
         tv_detail_location = findViewById(R.id.tv_detail_location); // 위치 TextView 바인딩
+        tv_detail_location_name = findViewById(R.id.tv_detail_location_name);
         btn_mark_as_sold = findViewById(R.id.btn_mark_as_sold);
 
         // MyPostAdapter에서 PostResponse 객체 전체를 "myPost" 키로 넘겨주고 있으므로, 이를 받습니다.
@@ -75,16 +76,22 @@ public class MyPostDetailActivity extends AppCompatActivity {
             tv_detail_description.setText(post.getDescription());
             tv_detail_status.setText(post.getStatus());
             tv_detail_price.setText(String.format("%,d원", post.getPrice())); // 가격 포맷팅
-            tv_detail_location.setText(post.getLocation_name()); // 위치 설정
+            tv_detail_location.setText("위도: " + String.format("%.4f", post.getLatitude()) + "\n" +
+                    "경도: " + String.format("%.4f", post.getLongitude()));
+            tv_detail_location_name.setText(post.getLocation_name()); // 위치 설정
 
             // Glide로 이미지 로드
+            String baseUrl = "https://swu-carrot.replit.app/";
+            String imageUrl = post.getImage_url();
+
             if (post.getImage_url() != null && !post.getImage_url().isEmpty()) {
+                String fullUrl = baseUrl + imageUrl;
                 Glide.with(MyPostDetailActivity.this)
-                        .load(post.getImage_url())
+                        .load(fullUrl)
                         .placeholder(R.drawable.default_image)
                         .into(iv_detail_image);
             } else {
-                iv_detail_image.setImageResource(R.drawable.default_image); // 기본 이미지
+                iv_detail_image.setImageResource(R.drawable.default_image);
             }
             Log.d(TAG, "인텐트로 게시물 상세 로드 성공: " + post.getTitle());
 
@@ -179,8 +186,6 @@ public class MyPostDetailActivity extends AppCompatActivity {
                     if (updatedCurrentPost != null) {
                         // UI 업데이트: 찾은 게시물의 상태로 업데이트
                         tv_detail_status.setText(updatedCurrentPost.getStatus());
-                        Toast.makeText(MyPostDetailActivity.this, "게시물 상태가 '" + updatedCurrentPost.getStatus() + "'로 업데이트되었습니다.", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "게시물 상태 업데이트 성공: ID " + currentPostId + ", 상태: " + updatedCurrentPost.getStatus());
 
                         // MyPostActivity로 결과 전달
                         Intent resultIntent = new Intent();
@@ -189,30 +194,14 @@ public class MyPostDetailActivity extends AppCompatActivity {
                         setResult(RESULT_OK, resultIntent);
 
                         finish(); // 상태 업데이트 후 상세 화면 닫기
-                    } else {
-                        // 업데이트된 리스트에 현재 게시물이 포함되어 있지 않은 경우
-                        Toast.makeText(MyPostDetailActivity.this, "업데이트된 게시물 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "업데이트된 게시물 리스트에서 currentPostId와 일치하는 게시물을 찾을 수 없음.");
                     }
 
-                } else {
-                    String errorMsg = "게시물 상태 업데이트 실패: " + response.code();
-                    try {
-                        if (response.errorBody() != null) {
-                            errorMsg += " - " + response.errorBody().string();
-                        }
-                    } catch (IOException e) {
-                        Log.e(TAG, "상태 업데이트 실패 에러 바디 읽기 실패", e);
-                    }
-                    Toast.makeText(MyPostDetailActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, errorMsg);
                 }
             }
 
             @Override
             public void onFailure(Call<List<PostResponse>> call, Throwable t) { // 여기도 수정했습니다!
-                Toast.makeText(MyPostDetailActivity.this, "서버 연결 오류로 게시물 상태 업데이트 실패: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e(TAG, "게시물 상태 업데이트 onFailure: " + t.getMessage(), t);
+                Toast.makeText(MyPostDetailActivity.this, "상태 변경에 실패하였습니다.", Toast.LENGTH_SHORT).show();
             }
         });
     }
