@@ -31,6 +31,7 @@ import com.example.daangnmarket.models.PostResponse;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+
 import java.io.IOException;
 
 import retrofit2.Call;
@@ -57,10 +58,13 @@ public class UploadActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "MyPrefsFile";
     private static final String KEY_USER_ID = "userId";
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload);
+
 
         // 툴바 설정 (선택 사항, 레이아웃에 툴바가 있다면)
         Toolbar toolbar = findViewById(R.id.toolbar); // activity_post_detail_my.xml에 toolbar id가 있다면
@@ -119,19 +123,20 @@ public class UploadActivity extends AppCompatActivity {
 
         btn_upload.setOnClickListener(v -> {
             uploadPost();
+
+
         });
 
     }
 
     private void uploadPost() {
         String title = et_title.getText().toString().trim();
-        String description = et_content.getText().toString().trim(); // description 필드 사용
+        String description = et_content.getText().toString().trim();
         String priceStr = et_price.getText().toString().trim();
-        String location_name = tv_location.getText().toString().trim();
+        String locationName = tv_location.getText().toString().trim();
 
-        // 1. 입력값 유효성 검사
         if (TextUtils.isEmpty(title) || TextUtils.isEmpty(description) ||
-                TextUtils.isEmpty(priceStr) || TextUtils.isEmpty(location_name)) {
+                TextUtils.isEmpty(priceStr) || TextUtils.isEmpty(locationName)) {
             Toast.makeText(this, "모든 항목을 입력해주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -148,38 +153,31 @@ public class UploadActivity extends AppCompatActivity {
             return;
         }
 
-        // 2. 이미지 URI를 String으로 변환 (PostRequest의 'image' 필드에 들어갈 값)
-        // 백엔드가 이 URI 문자열을 받아 이미지를 처리할 것으로 가정합니다.
-        String imageUrlString = selectedImageUri.toString();
-
-        // 3. PostRequest 객체 생성
-        // SharedPreferences에서 로그인된 사용자 ID 가져오기
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        int currentUserId = sharedPreferences.getInt(KEY_USER_ID, -1); // 기본값 -1, 적절히 처리
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefsFile", Context.MODE_PRIVATE);
+        int currentUserId = sharedPreferences.getInt("userId", -1);
+        Log.d("UploadActivity", "userId from SharedPreferences: " + currentUserId);
         if (currentUserId == -1) {
             Toast.makeText(this, "로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        Log.d("UploadActivity", "uploadPost() data: title=" + title + ", description=" + description +
+                ", price=" + price + ", sellerId=" + currentUserId + ", lat=" + currentLat +
+                ", lng=" + currentLng + ", locationName=" + locationName);
 
         PostRequest postRequest = new PostRequest(
                 title,
                 description,
                 price,
                 currentUserId,
-                currentLat,
-                currentLng,
-                location_name,
-                imageUrlString // 이미지 URI를 String으로 변환하여 전달
+                locationName
         );
 
-        // 4. API 호출
         apiService.createPost(postRequest).enqueue(new Callback<PostResponse>() {
             @Override
             public void onResponse(Call<PostResponse> call, Response<PostResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(UploadActivity.this, "게시물 업로드 성공!", Toast.LENGTH_SHORT).show();
-                    // 게시물 업로드 성공 시, MainActivity로 돌아가서 목록 갱신
                     setResult(RESULT_OK);
                     finish();
                 } else {
@@ -204,6 +202,7 @@ public class UploadActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void checkLocationPermission() {
         if(ActivityCompat.checkSelfPermission(this,

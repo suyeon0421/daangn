@@ -27,7 +27,7 @@ public interface ApiService {
     @POST("/products")
     Call<PostResponse> createPost(@Body PostRequest postRequest);
 
-    @GET("/products/")
+    @GET("/products")
     Call<List<PostResponse>> getAllPost();
 
     @GET("/products/{product_id}")

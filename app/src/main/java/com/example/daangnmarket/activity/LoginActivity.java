@@ -36,6 +36,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        RetrofitClient.initialize(getApplicationContext());
+
         apiService = RetrofitClient.getInstance().getApiService();
 
         et_username = findViewById(R.id.et_username);
@@ -89,11 +91,12 @@ public class LoginActivity extends AppCompatActivity {
                     String authToken = response.body().getToken(); // ← 로그인 응답에서 받은 토큰
                     int userId = response.body().getId(); // ← 로그인 응답에서 받은 사용자 ID
 
-                    // 🔥 여기서 SharedPreferences에 저장
+                    //sharedPreferences에 저장
                     SharedPreferences sharedPreferences = getSharedPreferences("MyPrefsFile", MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("authToken", authToken); // 🔐 토큰 저장
                     editor.putInt("userId", userId); // 👤 사용자 ID 저장
+
                     editor.apply();
                     //로그인 성공 시
                     UserResponse user = response.body();

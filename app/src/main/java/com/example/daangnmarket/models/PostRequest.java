@@ -1,35 +1,37 @@
 package com.example.daangnmarket.models;
 
-public class PostRequest {
-    private String title;
-    private String description;
-    private int price;
-    private int seller_id;
-    private double latitude;
-    private double longitude;
-    private String location_name;
-    private String image;
+import com.google.gson.annotations.SerializedName;
 
-    public PostRequest(String title, String description, int price, int seller_id,
-                       double latitude, double longitude, String location_name, String image) {
+public class PostRequest {
+    @SerializedName("title")
+    private String title;
+
+    @SerializedName("description")
+    private String description;
+
+    @SerializedName("price")
+    private int price;
+
+    @SerializedName("seller_id")
+    private int sellerId;
+
+
+    @SerializedName("location_name")
+    private String locationName;
+
+    public PostRequest(String title, String description, int price, int sellerId, String locationName) {
         this.title = title;
         this.description = description;
         this.price = price;
-        this.seller_id = seller_id;
-        this.latitude = 0.0;
-        this.longitude = 0.0;
-        this.location_name = location_name;
-        this.image = image;
+        this.sellerId = sellerId;
+        this.locationName = locationName;
     }
 
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public int getPrice() { return price; }
-    public int getSeller_id() { return seller_id; }
-    public double getLatitude() { return latitude; }
-    public double getLongitude() { return longitude; }
-    public String getLocation_name() { return location_name; }
-    public String getImage() { return image; }
+    public int getSellerId() { return sellerId; }
+    public String getLocationName() { return locationName; }
 
     public void setTitle(String title) {
         this.title = title;
@@ -41,20 +43,11 @@ public class PostRequest {
     public void setPrice(int price) {
         this.price = price;
     }
-    public void setSeller_id(int seller_id) {
-        this.seller_id = seller_id;
+    public void setSellerId(int sellerId) {
+        this.sellerId = sellerId;
     }
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-    public void setLocation_name(String location_name) {
-        this.location_name = location_name;
-    }
-    public void setImage(String image) {
-        this.image = image;
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
     }
 
 

@@ -17,7 +17,11 @@ import com.example.daangnmarket.R;
 import com.example.daangnmarket.RetrofitClient;
 import com.example.daangnmarket.models.PostResponse;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -81,6 +85,18 @@ public class PostDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        try (FileInputStream fis = openFileInput("last_post.txt")) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            Log.d(TAG, "저장된 마지막 게시글 제목: " + sb.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "내부 저장소 읽기 실패", e);
+        }
+
     }
 
     // 특정 게시물 상세 정보를 불러오는 메서드
@@ -92,6 +108,19 @@ public class PostDetailActivity extends AppCompatActivity {
                     post = response.body();
                     // UI에 데이터 바인딩
                     tv_title.setText(post.getTitle());
+
+                    // 마지막에 본 게시물 내부 저장소에 추가
+                    String filename = "last_post.txt";
+                    String content = post.getTitle();
+
+                    try (FileOutputStream fos = openFileOutput(filename, MODE_PRIVATE)) {
+                        fos.write(content.getBytes());
+                        Log.d(TAG, "게시글 제목을 내부 저장소에 저장함: " + content);
+                    } catch (IOException e) {
+                        Log.e(TAG, "내부 저장소 저장 실패", e);
+                    }
+
+
                     tv_location.setText("위도: " + String.format("%.4f", post.getLatitude()) + "\n" +
                             "경도: " + String.format("%.4f", post.getLongitude()));
                     tv_location_name.setText(post.getLocation_name());

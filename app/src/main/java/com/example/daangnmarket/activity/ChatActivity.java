@@ -23,10 +23,14 @@ import com.example.daangnmarket.RetrofitClient;
 import com.example.daangnmarket.adapter.MessageAdapter;
 import com.example.daangnmarket.models.Message;
 import com.example.daangnmarket.models.MessageSendRequest;
+import com.example.daangnmarket.models.PostResponse;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -47,6 +51,7 @@ public class ChatActivity extends AppCompatActivity {
     private int currentUserId;
     private int otherUserId;
     private int currentProductId;
+    private PostResponse post;
 
     private static final String PREFS_NAME = "MyPrefsFile";
     private static final String KEY_USER_ID = "userId";
@@ -57,7 +62,6 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d("ChatActivity", "onCreate 호출됨");
         setContentView(R.layout.activity_chat);
-
 
 
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -100,6 +104,8 @@ public class ChatActivity extends AppCompatActivity {
         messageAdapter = new MessageAdapter(this, messageList, currentUserId);
         recycler_view_chat.setAdapter(messageAdapter);
 
+        loadLocattionDetails(currentProductId);
+
         loadMessages();
 
         btn_send.setOnClickListener(new View.OnClickListener() {
@@ -116,14 +122,54 @@ public class ChatActivity extends AppCompatActivity {
         btn_location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ChatActivity.this, "위치 전송 기능 구현 예정", Toast.LENGTH_SHORT).show();
-                // TODO: 위치 정보 가져오기 및 전송 로직 추가
+                if (post != null) {
+                    Toast.makeText(ChatActivity.this,
+                            "위도: " + String.format("%.4f", post.getLatitude()) +
+                                    ", 경도: " + String.format("%.4f", post.getLongitude()),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    //위치 정보를 불러오기 위한 메소드
+    private void loadLocattionDetails(int productId) {
+        apiService.getPost(productId).enqueue(new Callback<PostResponse>() {
+            @Override
+            public void onResponse(Call<PostResponse> call, Response<PostResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    post = response.body(); // PostResponse 객체 초기화
+                    Log.d(TAG, "상품 상세 정보 로드 성공: " + post.getTitle());
+                    // 여기서 로드된 위치 정보로 UI 업데이트를 할 수도 있습니다.
+                } else {
+                    String errorMsg = "상품 상세 정보 로드 실패: " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorBodyString = response.errorBody().string();
+                            errorMsg += ", 에러 바디: " + errorBodyString;
+                            Log.e(TAG, "상품 상세 정보 로드 실패 - 에러 바디: " + errorBodyString);
+                        }
+                    } catch (IOException e) {
+                        Log.e(TAG, "상품 상세 정보 로드 실패 에러 바디 읽기 중 예외 발생", e);
+                        errorMsg += ", 에러 바디 읽기 실패: " + e.getMessage();
+                    }
+                    Toast.makeText(ChatActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    Log.e(TAG, errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PostResponse> call, Throwable t) {
+                String failureMsg = "상품 상세 정보 로드 네트워크 실패: " + t.getMessage();
+                Toast.makeText(ChatActivity.this, failureMsg, Toast.LENGTH_LONG).show();
+                Log.e(TAG, "상품 상세 정보 로드 onFailure: " + t.getMessage(), t);
             }
         });
     }
 
     private void sendMessage(String content, double latitude, double longitude, String locationName) {
         MessageSendRequest request;
+
 
         if (content != null && !content.isEmpty()) {
             request = new MessageSendRequest(currentProductId, currentUserId, otherUserId, content);
@@ -139,7 +185,9 @@ public class ChatActivity extends AppCompatActivity {
             public void onResponse(Call<Message> call, Response<Message> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Message sentMessage = response.body();
-                    // 서버에서 받은 메시지에 타입 설정
+
+
+                            // 서버에서 받은 메시지에 타입 설정
                     if (sentMessage.getLocationName() != null && !sentMessage.getLocationName().isEmpty()) {
                         sentMessage.setMessageType(Message.TYPE_LOCATION);
                         sentMessage.setLocationMessage(true);
@@ -148,6 +196,7 @@ public class ChatActivity extends AppCompatActivity {
                     } else {
                         sentMessage.setMessageType(Message.TYPE_OTHER);
                     }
+
                     messageAdapter.addMessage(sentMessage);
                     recycler_view_chat.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
                     Log.d(TAG, "메시지 전송 성공: " + sentMessage.getContent());
@@ -179,8 +228,15 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<List<Message>> call, Response<List<Message>> response) {
                         if (response.isSuccessful() && response.body() != null) {
+
                             List<Message> fetchedMessages = response.body();
-                            // 메시지 타입 설정 (중요)
+
+                            // 서버에서 메시지가 아예 없는 경우를 대비하여 null 체크
+                            if (fetchedMessages == null) {
+                                fetchedMessages = new ArrayList<>();
+                            }
+
+                            // 메시지 타입 설정 (기존 로직 유지)
                             for (Message msg : fetchedMessages) {
                                 if (msg.getLocationName() != null && !msg.getLocationName().isEmpty()) {
                                     msg.setMessageType(Message.TYPE_LOCATION);
@@ -191,20 +247,35 @@ public class ChatActivity extends AppCompatActivity {
                                     msg.setMessageType(Message.TYPE_OTHER);
                                 }
                             }
-                            messageAdapter.setMessages(fetchedMessages);
-                            recycler_view_chat.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
-                            Log.d(TAG, "메시지 로드 성공: " + fetchedMessages.size() + "개");
+
+                            // 메시지 리스트 업데이트 및 어댑터에 알림
+                            messageList.clear(); // 기존 메시지 삭제
+                            messageList.addAll(fetchedMessages); // 새 메시지 추가
+                            messageAdapter.notifyDataSetChanged(); // 어댑터 전체 갱신
+
+                            // ***** 핵심 수정 부분: 메시지가 있을 때만 스크롤 *****
+                            if (!messageList.isEmpty()) { // messageList.size() > 0 과 동일
+                                recycler_view_chat.smoothScrollToPosition(messageList.size() - 1);
+                                Log.d(TAG, "메시지 로드 성공 및 스크롤: " + messageList.size() + "개");
+                            } else {
+                                Log.d(TAG, "메시지 로드 성공: 메시지 없음.");
+                                // 메시지가 없을 경우 스크롤하지 않음 (오류 방지)
+                            }
+                            // *************************************************
+
                         } else {
-                            String errorMsg = "메시지 로드 실패: " + response.code();
+                            String errorMsg = "메시지 로드 실패: 응답 코드 " + response.code();
                             try {
                                 if (response.errorBody() != null) {
-                                    errorMsg += " - " + response.errorBody().string();
-                                    Log.e(TAG, "에러 바디: " + response.errorBody().string()); // 추가 로깅
+                                    String errorBodyString = response.errorBody().string();
+                                    errorMsg += ", 에러 바디: " + errorBodyString;
+                                    Log.e(TAG, "메시지 로드 실패 - 에러 바디: " + errorBodyString);
                                 }
                             } catch (IOException e) {
-                                Log.e(TAG, "메시지 로드 실패 에러 바디 읽기 실패", e);
+                                Log.e(TAG, "메시지 로드 실패 에러 바디 읽기 중 예외 발생", e);
+                                errorMsg += ", 에러 바디 읽기 실패: " + e.getMessage();
                             }
-                            Toast.makeText(ChatActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ChatActivity.this, errorMsg, Toast.LENGTH_LONG).show(); // 사용자에게 좀 더 자세한 메시지
                             Log.e(TAG, errorMsg);
                         }
                     }

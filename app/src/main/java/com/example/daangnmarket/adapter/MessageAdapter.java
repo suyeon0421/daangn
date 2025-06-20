@@ -15,8 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.daangnmarket.R;
 import com.example.daangnmarket.models.Message;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
@@ -40,9 +44,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         TextView tvOtherTime;
 
         LinearLayout layoutLocationMessage;
-        ImageView ivLocationIcon; // 위치 메시지 아이콘
-        TextView tvLocation; // 위치 메시지 텍스트
-
+        ImageView ivLocationIcon;
+        TextView tvLocation;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -55,8 +58,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             tvOtherTime = itemView.findViewById(R.id.tv_other_time);
 
             layoutLocationMessage = itemView.findViewById(R.id.layout_location_message);
-
-            ivLocationIcon = layoutLocationMessage.findViewById(android.R.id.icon); // 아이콘 ID가 없으면 null 반환 가능
+            ivLocationIcon = layoutLocationMessage.findViewById(android.R.id.icon);
             tvLocation = itemView.findViewById(R.id.tv_location);
         }
     }
@@ -69,38 +71,50 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     @Override
-    public void onBindViewHolder (@NonNull MessageViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Message message = messageList.get(position);
 
-        // 모든 레이아웃을 기본적으로 숨김
+        // 모든 레이아웃 숨김
         holder.layoutMyMessage.setVisibility(View.GONE);
         holder.layoutOtherMessage.setVisibility(View.GONE);
         holder.layoutLocationMessage.setVisibility(View.GONE);
 
+        String timestamp = message.getTimestamp();
+        String formattedTime = "";
+
+        try {
+            // 서버에서 받은 시간은 UTC라고 가정
+            SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+            serverFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            // 한국 시간으로 변환
+            SimpleDateFormat displayFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
+            displayFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+
+            Date date = serverFormat.parse(timestamp);
+            formattedTime = displayFormat.format(date);
+        } catch (Exception e) {
+            formattedTime = timestamp; // 파싱 실패 시 원본 출력
+        }
+
         if (message.isLocationMessage()) {
             holder.layoutLocationMessage.setVisibility(View.VISIBLE);
             holder.tvLocation.setText(message.getLocationName());
-            // 아이콘 관련 처리: XML에 ID가 없다면 ivLocationIcon이 null일 수 있습니다.
-            // 이 경우 기본 src="@android:drawable/ic_menu_mylocation"이 표시됩니다.
-
-        } else if (message.getSenderId() == currentUserId) { // 내가 보낸 메시지
+        } else if (message.getSenderId() == currentUserId) {
+            // 내 메시지
             holder.layoutMyMessage.setVisibility(View.VISIBLE);
             holder.tvMyMessage.setText(message.getContent());
-            holder.tvMyTime.setText(message.getTimestamp()); // 원시 타임스탬프 사용
+            holder.tvMyTime.setText(formattedTime);
 
-
-            // 레이아웃 정렬 (나의 메시지는 오른쪽)
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.layoutMyMessage.getLayoutParams();
             params.gravity = Gravity.END;
             holder.layoutMyMessage.setLayoutParams(params);
-
-        } else { // 상대방이 보낸 메시지
+        } else {
+            // 상대방 메시지
             holder.layoutOtherMessage.setVisibility(View.VISIBLE);
             holder.tvOtherMessage.setText(message.getContent());
-            holder.tvOtherTime.setText(message.getTimestamp()); // 원시 타임스탬프 사용
+            holder.tvOtherTime.setText(formattedTime);
 
-
-            // 레이아웃 정렬 (상대방 메시지는 왼쪽)
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.layoutOtherMessage.getLayoutParams();
             params.gravity = Gravity.START;
             holder.layoutOtherMessage.setLayoutParams(params);
