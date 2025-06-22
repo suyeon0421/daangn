@@ -79,6 +79,7 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
+
         apiService = RetrofitClient.getInstance().getApiService();
 
         recycler_view_chat = findViewById(R.id.recycler_view_chat);
@@ -130,6 +131,13 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadMessages(); // 액티비티가 다시 활성화될 때마다 메시지 로드
     }
 
     //위치 정보를 불러오기 위한 메소드
@@ -213,6 +221,8 @@ public class ChatActivity extends AppCompatActivity {
                     Log.e(TAG, errorMsg);
                 }
             }
+
+
 
             @Override
             public void onFailure(Call<Message> call, Throwable t) {

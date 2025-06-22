@@ -61,6 +61,4 @@ public interface ApiService {
             @Path("user1_id") int username1, // 경로의 {username1} 부분에 값 삽
             @Path("user2_id") int username2 // 경로의 {username2} 부분에 값
     );
-    @GET("/messages/conversations/{user_id}")
-    Call<List<Message>> getUserConversations(@Path("user_id") int user_id);
 }

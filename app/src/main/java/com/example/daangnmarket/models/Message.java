@@ -9,6 +9,7 @@ public class Message implements Serializable {
     public static final int TYPE_OTHER = 1;
     public static final int TYPE_LOCATION = 2;
 
+    @SerializedName("id") // <-- 이 부분에 @SerializedName 추가 (서버 JSON에 "id"가 있음)
     private int id;
     @SerializedName("product_id")
     private int productId;
@@ -20,15 +21,20 @@ public class Message implements Serializable {
     private int receiverId;
     @SerializedName("receiver_name")
     private String receiverName;
+    @SerializedName("content") // <-- 이 부분에 @SerializedName 추가 (서버 JSON에 "content"가 있음)
     private String content;
+    @SerializedName("latitude") // <-- 이 부분에 @SerializedName 추가 (서버 JSON에 "latitude"가 있음)
     private double latitude;
+    @SerializedName("longitude") // <-- 이 부분에 @SerializedName 추가 (서버 JSON에 "longitude"가 있음)
     private double longitude;
     @SerializedName("location_name")
     private String locationName;
+    @SerializedName("timestamp") // <-- 이 부분에 @SerializedName 추가 (서버 JSON에 "timestamp"가 있음)
     private String timestamp; // 서버에서 받은 원본 시간 문자열
 
     private int messageType;
     private boolean isLocationMessage;
+
 
     // 일반 메시지 생성자
     public Message (int id, int productId, int senderId, String senderName,
@@ -65,7 +71,7 @@ public class Message implements Serializable {
         this.isLocationMessage = true;
     }
 
-    // Getter 및 Setter
+    // Getter 및 Setter (모든 필드에 대해 존재함)
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public int getProductId() { return productId; }
@@ -94,4 +100,23 @@ public class Message implements Serializable {
     public boolean isLocationMessage() { return isLocationMessage; }
     public void setLocationMessage(boolean locationMessage) { isLocationMessage = locationMessage; }
 
+    // 디버깅을 위한 toString() 메서드 추가 (필수 아님, 하지만 디버깅에 매우 유용)
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id=" + id +
+                ", productId=" + productId +
+                ", senderId=" + senderId +
+                ", senderName='" + senderName + '\'' +
+                ", receiverId=" + receiverId +
+                ", receiverName='" + receiverName + '\'' +
+                ", content='" + content + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", locationName='" + locationName + '\'' +
+                ", timestamp='" + timestamp + '\'' +
+                ", messageType=" + messageType +
+                ", isLocationMessage=" + isLocationMessage +
+                '}';
+    }
 }
