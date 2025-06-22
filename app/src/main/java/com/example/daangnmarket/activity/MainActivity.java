@@ -8,16 +8,22 @@ import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,10 +32,14 @@ import com.example.daangnmarket.R;
 import com.example.daangnmarket.RetrofitClient;
 import com.example.daangnmarket.adapter.MainPostAdapter;
 import com.example.daangnmarket.models.PostResponse;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.messaging.FirebaseMessaging;
+
 import android.Manifest;
 import androidx.core.app.ActivityCompat;
 import android.content.pm.PackageManager;
@@ -43,7 +53,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity";
 
     private RecyclerView recyclerView;
     private MainPostAdapter postAdapter;
@@ -58,7 +70,6 @@ public class MainActivity extends AppCompatActivity{
     double currentLng = 0.0;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,14 +81,14 @@ public class MainActivity extends AppCompatActivity{
         apiService = RetrofitClient.getInstance().getApiService();
 
         recyclerView = findViewById(R.id.recycler_view_posts);
-        postAdapter = new MainPostAdapter(MainActivity.this,mainPostList);
+        postAdapter = new MainPostAdapter(MainActivity.this, mainPostList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(postAdapter);
 
         PostResponse newPost = (PostResponse) getIntent().getSerializableExtra("new_post");
         if (newPost != null) {
             mainPostList.add(newPost);
-            postAdapter.notifyItemInserted(mainPostList.size() -1);
+            postAdapter.notifyItemInserted(mainPostList.size() - 1);
         }
 
 
@@ -89,9 +100,48 @@ public class MainActivity extends AppCompatActivity{
         });
 
         loadAllPosts();
+
+        getFirebaseToken();
+
+        askNotificationPermission();
     }
 
-    @Override
+    private void getFirebaseToken() {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+            @Override
+            public void onComplete(@NonNull Task<String> task) {
+                if (!task.isSuccessful()) {
+                    Log.w(TAG, "FCM 토큰 가져오기 실패", task.getException());
+                    return;
+                }
+                String token = task.getResult();
+                Log.d(TAG, "FCM 토큰: " + token);
+            }
+        });
+    }
+
+    private void askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "알림 권한이 이미 있습니다.");
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+    }
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    Toast.makeText(this, "알림 권한이 허용되었습니다.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "알림 권한이 없으면 FCM 알림을 받을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
+@Override
     protected void onResume() {
         super.onResume();
         loadAllPosts();
@@ -136,5 +186,7 @@ public class MainActivity extends AppCompatActivity{
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 
 }

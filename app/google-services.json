@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "440498794090",
+    "project_id": "daangnmarket-d6237",
+    "storage_bucket": "daangnmarket-d6237.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:440498794090:android:96c81c4c73e2a7c6696413",
+        "android_client_info": {
+          "package_name": "com.example.daangnmarket"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_wr1K4fiKGQ-hGJLrpvoMyw4HgRa8TCQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

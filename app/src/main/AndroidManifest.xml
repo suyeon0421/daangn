@@ -11,8 +11,10 @@
         android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission
         android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
+
         android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -23,6 +25,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Daangnmarket"
         tools:targetApi="31">
+
+        <service android:name=".MyFirebaseMessagingService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.frebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notifcation_channel_id"
+            android:value="fcm_default_channel" />
         <activity
             android:name=".activity.SignupActivity"
             android:exported="true">
@@ -39,6 +51,7 @@
         <activity android:name=".activity.MyPostActivity"> </activity>
         <activity android:name=".activity.MyPostDetailActivity"> </activity>
         <activity android:name=".activity.ChatActivity"> </activity>
+
     </application>
 
 </manifest>

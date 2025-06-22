@@ -15,15 +15,23 @@ public class PostRequest {
     @SerializedName("seller_id")
     private int sellerId;
 
+    @SerializedName("latitude")
+    private double latitude;
+
+    @SerializedName("longitude")
+    private double longitude;
 
     @SerializedName("location_name")
     private String locationName;
 
-    public PostRequest(String title, String description, int price, int sellerId, String locationName) {
+    public PostRequest(String title, String description, int price, int sellerId, double latitude,
+                       double longitude, String locationName) {
         this.title = title;
         this.description = description;
         this.price = price;
         this.sellerId = sellerId;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.locationName = locationName;
     }
 

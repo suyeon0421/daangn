@@ -1,7 +1,10 @@
 package com.example.daangnmarket.activity;
 
+
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -9,15 +12,27 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.Manifest;
 
-import androidx.appcompat.app.AlertDialog;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import android.content.pm.PackageManager;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import com.example.daangnmarket.ApiService;
 import com.example.daangnmarket.R;
 import com.example.daangnmarket.RetrofitClient;
 import com.example.daangnmarket.models.RegisterRequest;
 import com.example.daangnmarket.models.UserResponse;
+import com.google.android.gms.tasks.Task;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,7 +41,6 @@ import retrofit2.Response;
 public class SignupActivity extends AppCompatActivity {
     private EditText et_username, et_password, et_name;
     private Button btn_signup, btn_login;
-    private AlertDialog dialog; // 사용되지 않으면 제거 권장
 
     private ApiService apiService;
 
@@ -36,6 +50,7 @@ public class SignupActivity extends AppCompatActivity {
     private static final String KEY_USER_ID = "userId";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_NAME = "name";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +66,9 @@ public class SignupActivity extends AppCompatActivity {
         btn_login = findViewById(R.id.btn_login);
 
         setupClickListeners();
+
     }
+
 
     private void setupClickListeners() {
         btn_signup.setOnClickListener(new View.OnClickListener() {
@@ -142,3 +159,6 @@ public class SignupActivity extends AppCompatActivity {
         editor.apply();
     }
 }
+
+
+
