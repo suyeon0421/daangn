@@ -75,7 +75,7 @@ public class MyPostAdapter extends RecyclerView.Adapter<MyPostAdapter.ViewHolder
         // 클릭 이벤트 한 번만 등록하고, 필요한 데이터만 넘김
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, MyPostDetailActivity.class);
-            intent.putExtra("myPost", post); // PostResponse는 Serializable 또는 Parcelable이어야 함
+            intent.putExtra("myPost", post);
             context.startActivity(intent); // startActivity 실행 필수
         });
     }

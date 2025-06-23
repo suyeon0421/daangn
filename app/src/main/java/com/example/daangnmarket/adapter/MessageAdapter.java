@@ -25,8 +25,8 @@ import java.util.TimeZone;
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
     private Context context;
-    private ArrayList<Message> messageList;
-    private int currentUserId;
+    private ArrayList<Message> messageList; // 메시지 데이터 리스트
+    private int currentUserId; // 현재 사용자 ID (보낸 사람 판단용)
 
     public MessageAdapter(Context context, ArrayList<Message> messageList, int currentUserId) {
         this.context = context;
@@ -34,6 +34,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         this.currentUserId = currentUserId;
     }
 
+    // 뷰홀더 클래스: 뷰를 재활용하기 위한 구조 (배터리 및 메모리 효율에 도움)
     public static class MessageViewHolder extends RecyclerView.ViewHolder {
         LinearLayout layoutMyMessage;
         TextView tvMyMessage;
@@ -74,7 +75,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Message message = messageList.get(position);
 
-        // 모든 레이아웃 숨김
         holder.layoutMyMessage.setVisibility(View.GONE);
         holder.layoutOtherMessage.setVisibility(View.GONE);
         holder.layoutLocationMessage.setVisibility(View.GONE);
@@ -83,14 +83,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         String formattedTime = "";
 
         try {
-            // 서버에서 받은 시간은 UTC라고 가정
+            // 서버 시간 (UTC) -> 한국 시간(KST) 포맷팅
             SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
             serverFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-            // 한국 시간으로 변환
             SimpleDateFormat displayFormat = new SimpleDateFormat("a hh:mm", Locale.KOREA);
             displayFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-
             Date date = serverFormat.parse(timestamp);
             formattedTime = displayFormat.format(date);
         } catch (Exception e) {
@@ -98,19 +95,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
 
         if (message.isLocationMessage()) {
+            // 위치 메시지일 경우 아이콘 + 위치명 표시
             holder.layoutLocationMessage.setVisibility(View.VISIBLE);
             holder.tvLocation.setText(message.getLocationName());
         } else if (message.getSenderId() == currentUserId) {
-            // 내 메시지
+            // 본인 메시지 (오른쪽 정렬)
             holder.layoutMyMessage.setVisibility(View.VISIBLE);
             holder.tvMyMessage.setText(message.getContent());
             holder.tvMyTime.setText(formattedTime);
 
+            // 정렬을 위해 Gravity 설정 (효율적인 UI 구성)
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.layoutMyMessage.getLayoutParams();
             params.gravity = Gravity.END;
             holder.layoutMyMessage.setLayoutParams(params);
         } else {
-            // 상대방 메시지
+            // 상대방 메시지 (왼쪽 정렬)
             holder.layoutOtherMessage.setVisibility(View.VISIBLE);
             holder.tvOtherMessage.setText(message.getContent());
             holder.tvOtherTime.setText(formattedTime);
@@ -123,17 +122,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public int getItemCount() {
-        return messageList.size();
+        return messageList.size(); // 데이터 개수 반환 (RecyclerView 최적화 핵심)
     }
 
+    // 메시지 추가 시 리스트에 삽입 및 어댑터 알림
     public void addMessage(Message message) {
         messageList.add(message);
-        notifyItemInserted(messageList.size() - 1);
+        notifyItemInserted(messageList.size() - 1); // 성능상 전체 갱신 대신 부분 갱신
     }
 
+    // 메시지 리스트 전체 갱신 (드물게 사용)
     public void setMessages(List<Message> newMessages) {
         messageList.clear();
         messageList.addAll(newMessages);
-        notifyDataSetChanged();
+        notifyDataSetChanged(); // 전체 변경 알림 (배터리 효율 고려 시 빈번한 호출은 지양)
     }
 }

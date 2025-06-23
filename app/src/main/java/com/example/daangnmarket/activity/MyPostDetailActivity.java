@@ -178,17 +178,15 @@ public class MyPostDetailActivity extends AppCompatActivity {
     private void updatePostStatus(int currentPostId, String newStatus) {
         StatusRequest requestBody = new StatusRequest(newStatus);
 
-        // Call<List<PostResponse>> -> Call<PostResponse>로 변경
-        apiService.updateProductStatus(currentPostId, requestBody).enqueue(new Callback<PostResponse>() { // 콜백 타입 변경
+        apiService.updateProductStatus(currentPostId, requestBody).enqueue(new Callback<PostResponse>() {
             @Override
-            public void onResponse(Call<PostResponse> call, Response<PostResponse> response) { // 콜백 타입 변경
+            public void onResponse(Call<PostResponse> call, Response<PostResponse> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
-                        PostResponse updatedPost = response.body(); // 단일 PostResponse 객체
+                        PostResponse updatedPost = response.body();
 
-                        // UI 업데이트: 응답으로 받은 객체의 상태로 업데이트
                         tv_detail_status.setText(updatedPost.getStatus());
-                        currentPostStatus = updatedPost.getStatus(); // 현재 상태 변수도 업데이트
+                        currentPostStatus = updatedPost.getStatus();
 
                         Toast.makeText(MyPostDetailActivity.this, "게시물 상태가 '" + updatedPost.getStatus() + "'로 변경되었습니다.", Toast.LENGTH_SHORT).show();
 
@@ -197,10 +195,9 @@ public class MyPostDetailActivity extends AppCompatActivity {
                         resultIntent.putExtra("updated_post_id", updatedPost.getId());
                         resultIntent.putExtra("updated_post_status", updatedPost.getStatus());
                         setResult(RESULT_OK, resultIntent);
-                        finish(); // 성공했으니 상세 화면 닫기
+                        finish();
                     } else {
-                        // 서버 응답은 성공했지만 body가 null인 경우 (예: HTTP 204 No Content)
-                        // 이 경우, 클라이언트 측에서 `newStatus`를 기반으로 UI를 직접 업데이트합니다.
+
                         tv_detail_status.setText(newStatus);
                         currentPostStatus = newStatus; // 현재 상태 변수 업데이트
 
@@ -213,7 +210,6 @@ public class MyPostDetailActivity extends AppCompatActivity {
                         finish();
                     }
                 } else {
-                    // 서버에서 2xx 이외의 응답이 온 경우 (예: 400 Bad Request, 404 Not Found, 500 Internal Server Error 등)
                     String errorMessage = "상태 변경 실패";
                     try {
                         if (response.errorBody() != null) {
@@ -230,14 +226,12 @@ public class MyPostDetailActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<PostResponse> call, Throwable t) { // 콜백 타입 변경
-                // 네트워크 연결 자체의 문제 또는 Gson 파싱 오류
-                // 여기에 t.printStackTrace();를 추가하면 정확한 예외를 볼 수 있습니다.
+            public void onFailure(Call<PostResponse> call, Throwable t) {
+
                 Toast.makeText(MyPostDetailActivity.this, "상태 변경 오류: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 Log.e(TAG, "상태 변경 onFailure: " + t.getMessage(), t);
-                t.printStackTrace(); // 어떤 예외인지 확인용
+                t.printStackTrace();
 
-                // 오류 발생 시 화면을 닫음 (필수)
                 finish();
             }
         });

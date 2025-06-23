@@ -59,7 +59,6 @@ public class LoginActivity extends AppCompatActivity {
         editor.putString(KEY_NAME, user.getName()); // 필요시 저장
 
         editor.apply(); // 비동기적으로 저장 (대부분의 경우 apply 사용)
-        // editor.commit(); // 동기적으로 저장 (즉시 필요할 경우 사용)
     }
 
 
@@ -88,14 +87,14 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    String authToken = response.body().getToken(); // ← 로그인 응답에서 받은 토큰
-                    int userId = response.body().getId(); // ← 로그인 응답에서 받은 사용자 ID
+                    String authToken = response.body().getToken();
+                    int userId = response.body().getId();
 
                     //sharedPreferences에 저장
                     SharedPreferences sharedPreferences = getSharedPreferences("MyPrefsFile", MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("authToken", authToken); // 🔐 토큰 저장
-                    editor.putInt("userId", userId); // 👤 사용자 ID 저장
+                    editor.putString("authToken", authToken);
+                    editor.putInt("userId", userId);
 
                     editor.apply();
                     //로그인 성공 시
